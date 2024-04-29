@@ -1,0 +1,24 @@
+- name: Set the hostname
+  hostname:
+    name: "margaret"
+
+- name: Update all packages to the latest version
+  apt:
+    update_cache: yes
+    upgrade: dist
+
+- name: Install required system packages
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+      - gnupg
+    state: present
+
+- name: Install Docker
+  include_tasks: roles/margaret-setup/tasks/install_docker.yaml
+
+- name: Install Node
+  include_tasks: roles/margaret-setup/tasks/install_node.yaml

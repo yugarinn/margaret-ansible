@@ -1,0 +1,12 @@
+- name: Margaret Setup
+  hosts: servers
+  become: yes
+
+  vars_files:
+    - secrets.yaml
+
+  roles:
+    - yugarinn-setup
+    - margaret-setup
+    - barelyzen-installation
+    - nginx-setup

@@ -1,0 +1,24 @@
+- name: Ensure projects directory exists
+  file:
+    path: '/home/yugarinn/projects'
+    state: directory
+    owner: yugarinn
+    group: yugarinn
+    mode: '0755'
+
+- name: Clone repository into the projects directory
+  git:
+    repo: 'https://github.com/yugarinn/barelyzen.me.git'
+    dest: '/home/yugarinn/projects/barelyzen.me'
+    clone: yes
+    update: yes
+
+- name: Install dependencies
+  shell: npm install
+  args:
+    chdir: /home/yugarinn/projects/barelyzen.me
+
+- name: Build the static files
+  shell: npm run build
+  args:
+    chdir: /home/yugarinn/projects/barelyzen.me

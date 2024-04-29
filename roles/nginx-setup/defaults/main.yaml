@@ -1,0 +1,6 @@
+nginx_docker_image: "nginx:latest"
+nginx_sites:
+  barelyzen.me:
+    domain: "site1.example.com"
+    content_path: "/home/yugarinn/projects/barelyzen.me"
+nginx_config_path: "/home/ubuntu/nginx.conf"

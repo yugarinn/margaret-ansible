@@ -1,0 +1,7 @@
+- name: Add NodeSource Node.js binary distributions repository
+  ansible.builtin.shell: curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+
+- name: Install Node.js
+  apt:
+    name: nodejs
+    state: present

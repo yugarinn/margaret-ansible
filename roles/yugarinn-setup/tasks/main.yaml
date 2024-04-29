@@ -1,0 +1,17 @@
+- name: Create the yugarinn user
+  user:
+    name: yugarinn
+    groups: sudo
+    createhome: yes
+    shell: /bin/bash
+
+- name: Set password for yugarinn
+  user:
+    name: yugarinn
+    password: "{{ yugarinn_password }}"
+
+- name: Add SSH public key to yugarinn
+  authorized_key:
+    user: yugarinn
+    state: present
+    key: "{{ lookup('file', '/home/yugarinn/.ssh/id_rsa.pub') }}"

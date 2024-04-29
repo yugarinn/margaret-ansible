@@ -1,0 +1,39 @@
+- name: Ensure Docker is installed
+  apt:
+    name: docker.io
+    state: present
+
+- name: Pull Nginx Docker image
+  docker_image:
+    name: "{{ nginx_docker_image }}"
+    source: pull
+
+- name: Create directories for static content
+  file:
+    path: "{{ item.value.content_path }}"
+    state: directory
+  with_dict: "{{ nginx_sites }}"
+
+- name: Copy static content to directories
+  copy:
+    src: "{{ item.key }}_index.html"
+    dest: "{{ item.value.content_path }}/index.html"
+  with_dict: "{{ nginx_sites }}"
+
+- name: Copy Nginx configuration file
+  copy:
+    src: nginx.conf
+    dest: "{{ nginx_config_path }}"
+
+- name: Run Nginx container
+  docker_container:
+    name: nginx-sites
+    image: "{{ nginx_docker_image }}"
+    state: started
+    restart_policy: always
+    ports:
+      - "80:80"
+    volumes:
+      - "{{ nginx_config_path }}:/etc/nginx/nginx.conf:ro"
+      - "{{ site1.content_path }}:/usr/share/nginx/site1:ro"
+      - "{{ site2.content_path }}:/usr/share/nginx/site2:ro"
