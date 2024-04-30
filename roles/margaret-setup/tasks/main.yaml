@@ -17,6 +17,34 @@
       - gnupg
     state: present
 
+- name: Ensure ufw is installed
+  apt:
+    name: ufw
+    state: present
+
+- name: Enable ufw
+  ufw:
+    state: enabled
+    default: deny
+
+- name: Allow SSH traffic
+  ufw:
+    rule: allow
+    port: '22'
+    proto: tcp
+
+- name: Allow HTTP traffic
+  ufw:
+    rule: allow
+    port: '80'
+    proto: tcp
+
+- name: Allow HTTPS traffic
+  ufw:
+    rule: allow
+    port: '443'
+    proto: tcp
+
 - name: Install Docker
   include_tasks: roles/margaret-setup/tasks/install_docker.yaml
 

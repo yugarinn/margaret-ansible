@@ -1,6 +1,6 @@
 - name: Ensure Docker is installed
   apt:
-    name: docker.io
+    name: docker-ce
     state: present
 
 - name: Pull Nginx Docker image
@@ -8,32 +8,19 @@
     name: "{{ nginx_docker_image }}"
     source: pull
 
-- name: Create directories for static content
-  file:
-    path: "{{ item.value.content_path }}"
-    state: directory
-  with_dict: "{{ nginx_sites }}"
-
-- name: Copy static content to directories
+- name: Copy Nginx configuration (if required)
   copy:
-    src: "{{ item.key }}_index.html"
-    dest: "{{ item.value.content_path }}/index.html"
-  with_dict: "{{ nginx_sites }}"
+    src: "./../files/nginx.conf"
+    dest: "/home/yugarinn/nginx.conf"
 
-- name: Copy Nginx configuration file
-  copy:
-    src: nginx.conf
-    dest: "{{ nginx_config_path }}"
-
-- name: Run Nginx container
+- name: Create Nginx container
   docker_container:
-    name: nginx-sites
+    name: nginx
     image: "{{ nginx_docker_image }}"
     state: started
     restart_policy: always
     ports:
       - "80:80"
     volumes:
-      - "{{ nginx_config_path }}:/etc/nginx/nginx.conf:ro"
-      - "{{ site1.content_path }}:/usr/share/nginx/site1:ro"
-      - "{{ site2.content_path }}:/usr/share/nginx/site2:ro"
+      - "/home/yugarinn/projects/barelyzen.me/build:/usr/share/nginx/barelyzen.me:ro"
+      - "/home/yugarinn/nginx.conf:/etc/nginx/nginx.conf:ro"

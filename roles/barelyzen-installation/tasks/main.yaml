@@ -6,11 +6,12 @@
     group: yugarinn
     mode: '0755'
 
-- name: Clone repository into the projects directory
+- name: Clone or pull the repository into the projects directory
   git:
     repo: 'https://github.com/yugarinn/barelyzen.me.git'
     dest: '/home/yugarinn/projects/barelyzen.me'
     clone: yes
+    force: yes
     update: yes
 
 - name: Install dependencies
