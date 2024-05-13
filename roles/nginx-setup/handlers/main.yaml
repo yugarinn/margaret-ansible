@@ -1,11 +1,4 @@
 - name: reload nginx
-  docker_container:
+  ansible.builtin.systemd:
     name: nginx
-    state: restarted
-    restart_policy: always
-    image: "{{ nginx_docker_image }}"
-    ports:
-      - "80:80"
-    volumes:
-      - "/home/yugarinn/projects/barelyzen.me/build:/usr/share/nginx/barelyzen.me:ro"
-      - "/home/yugarinn/nginx.conf:/etc/nginx/nginx.conf:ro"
+    state: reloaded

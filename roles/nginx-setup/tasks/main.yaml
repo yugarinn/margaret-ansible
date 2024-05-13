@@ -1,26 +1,65 @@
-- name: Ensure Docker is installed
-  apt:
-    name: docker-ce
+- name: Install and refresh core snap
+  ansible.builtin.shell:
+    cmd: "snap install core; snap refresh core"
+
+- name: Install certbot with snap
+  ansible.builtin.shell:
+    cmd: "snap install --classic certbot"
+
+- name: Install certbot Nginx plugin with snap
+  ansible.builtin.shell:
+    cmd: "snap install --classic certbot-nginx-unit"
+
+- name: Create symlink for certbot
+  ansible.builtin.shell:
+    cmd: "ln -s /snap/bin/certbot /usr/bin/certbot"
+  args:
+    creates: "/usr/bin/certbot"
+
+- name: Install Nginx
+  ansible.builtin.apt:
+    name: nginx
     state: present
 
-- name: Pull Nginx Docker image
-  docker_image:
-    name: "{{ nginx_docker_image }}"
-    source: pull
+- name: Ensure certificates directory exists
+  ansible.builtin.file:
+    path: /etc/letsencrypt
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
 
-- name: Copy Nginx configuration (if required)
-  copy:
-    src: "./../files/nginx.conf"
-    dest: "/home/yugarinn/nginx.conf"
+- name: Copy HTTP Nginx configuration
+  ansible.builtin.copy:
+    src: "../files/nginx-http.conf"
+    dest: "/etc/nginx/nginx.conf"
 
-- name: Create Nginx container
-  docker_container:
+- name: Ensure Nginx is enabled and running
+  ansible.builtin.systemd:
     name: nginx
-    image: "{{ nginx_docker_image }}"
     state: started
-    restart_policy: always
-    ports:
-      - "80:80"
-    volumes:
-      - "/home/yugarinn/projects/barelyzen.me/build:/usr/share/nginx/barelyzen.me:ro"
-      - "/home/yugarinn/nginx.conf:/etc/nginx/nginx.conf:ro"
+    enabled: true
+
+- name: Allow HTTP on port 80
+  ansible.builtin.ufw:
+    rule: allow
+    port: '80'
+    proto: tcp
+
+- name: Allow HTTPS on port 443
+  ansible.builtin.ufw:
+    rule: allow
+    port: '443'
+    proto: tcp
+
+- name: Obtain Let's Encrypt certificate
+  ansible.builtin.shell:
+    cmd: "certbot certonly --nginx --non-interactive --agree-tos --email yugarinn@proton.me -d barelyzen.me -d www.barelyzen.me"
+  args:
+    creates: "/etc/letsencrypt/live/barelyzen.me/fullchain.pem"
+
+- name: Copy HTTPS Nginx configuration
+  ansible.builtin.copy:
+    src: "../files/nginx-https.conf"
+    dest: "/etc/nginx/nginx.conf"
+  notify: reload nginx

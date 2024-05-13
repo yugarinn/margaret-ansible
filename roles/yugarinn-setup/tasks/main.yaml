@@ -15,3 +15,10 @@
     user: yugarinn
     state: present
     key: "{{ lookup('file', '/home/yugarinn/.ssh/id_rsa.pub') }}"
+
+- name: Set permissions to 755 for the home directory
+  file:
+    path: "/home/yugarinn"
+    mode: '0755'
+    state: directory
+  become: yes
